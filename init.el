@@ -1,6 +1,6 @@
 ;;; init.el --- Emacs Writing Studio init -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2024 Peter Prevos
+;; Copyright (C) 2024-2025 Peter Prevos
 
 ;; Author: Peter Prevos <peter@prevos.net>
 ;; Maintainer: Peter Prevos <peter@prevos.net>
@@ -21,28 +21,19 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <https://www.gnu.org/licenses/>.
 ;;
-;;; Commentary:
+;; Emacs Writing Studio init file: https://lucidmanager.org/tags/emacs
 ;;
-;; Emacs Writing Studio init file
-;; https://lucidmanager.org/tags/emacs
+;; This init file is tangled from: documents/99-appendix.org
 ;;
-;; This init file is tangled from the Org mode source:
-;; documents/ews-book/99-appendix.org
+;; This file provides a starter kit for developing a configuration and is
+;; not a package that is regularly updated.
 ;;
 ;;; Code:
 
-;; Emacs 29 avaibale?
+;; Emacs 29 available?
 
 (when (< emacs-major-version 29)
-  (error "Emacs Writing Studio requires Emacs version 29 or later"))
-
-;; Custom settings in a separate file and load the custom settings
-
-(setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
-
-(load custom-file :no-error-if-file-is-missing)
-
-(keymap-global-set "C-c w v" 'customize-variable)
+  (error "Emacs Writing Studio requires version 29 or later"))
 
 ;; Set package archives
 
@@ -62,38 +53,29 @@
 
 ;; Load EWS functions
 
-(load-file (concat (file-name-as-directory user-emacs-directory) "ews.el"))
+(load-file (concat (file-name-as-directory user-emacs-directory)
+		   "ews.el"))
 
 ;; Check for missing external software
-;;
-;; - soffice (LibreOffice): View and create office documents
-;; - zip: Unpack ePub documents
-;; - pdftotext (poppler-utils): Convert PDF to text
-;; - ddjvu (DjVuLibre): View DjVu files
-;; - curl: Reading RSS feeds
-;; - convert (ImageMagick) or gm (GraphicsMagick): Convert image files  ;; - latex (TexLive, MacTex or MikTeX): Preview LaTex and export Org to PDF
-;; - hunspell: Spellcheck. Also requires a hunspell dictionary
-;; - grep: Search inside files
-;; - gs (GhostScript) or mutool (MuPDF): View PDF files
-;; - mpg321, ogg123 (vorbis-tools), mplayer, mpv, vlc: Media players
-;; - git: Version control
 
 (ews-missing-executables
- '("soffice"
-   "zip"
+ '(("gs" "mutool")
    "pdftotext"
+   "soffice"
+   "zip"
    "ddjvu"
    "curl"
+   ("mpg321" "ogg123" "mplayer" "mpv" "vlc") 
+   ("grep" "ripgrep")
    ("convert" "gm")
+   "dvipng"
    "latex"
    "hunspell"
-   "grep"
-   ("gs" "mutool")
-   ("mpg321" "ogg123" "mplayer" "mpv" "vlc")
    "git"))
 
 ;;; LOOK AND FEEL
 
+(setq inhibit-splash-screen t)
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
@@ -102,12 +84,19 @@
 
 (setq-default use-short-answers t)
 
+;; Scratch buffer settings
+
+(setq initial-major-mode 'org-mode
+      initial-scratch-message (concat "#+title: Emacs Writing Studio\n"
+					"#+subtitle: Scratch Buffer\n\n"
+					"The text in this buffer is not saved "
+					"when exiting Emacs!\n\n"))
+
 ;; Spacious padding
 
 (use-package spacious-padding
   :custom
   (line-spacing 3)
-  :init
   (spacious-padding-mode 1))
 
 ;; Modus and EF Themes
@@ -117,15 +106,14 @@
   (modus-themes-italic-constructs t)
   (modus-themes-bold-constructs t)
   (modus-themes-mixed-fonts t)
-  (modus-themes-to-toggle '(modus-operandi-tinted modus-vivendi-tinted))
+  (modus-themes-to-toggle '(modus-operandi-tinted
+			    modus-vivendi-tinted))
   :bind
   (("C-c w t t" . modus-themes-toggle)
    ("C-c w t m" . modus-themes-select)
    ("C-c w t s" . consult-theme)))
 
-(use-package ef-themes)
-
-;; Mixed-pich mode
+;; Mixed-pitch mode
 
 (use-package mixed-pitch
   :hook
@@ -182,7 +170,21 @@
   :custom
   (which-key-max-description-length 40)
   (which-key-lighter nil)
-  (which-key-sort-order 'which-key-description-order))
+  (which-key-sort-order 'which-key-description-order)
+  :init
+  (which-key-add-key-based-replacements
+    "C-c w"   "Emacs Writing Studio"
+    "C-c w b" "Bibliographic"
+    "C-c w d" "Denote"
+    "C-c w m" "Multimedia"
+    "C-c w s" "Spelling and Grammar"
+    "C-c w t" "Themes"
+    "C-c w x" "Explore"))
+
+;; Contextual menu with right mouse button
+
+(when (display-graphic-p)
+  (context-menu-mode))
 
 ;; Improved help buffers
 
@@ -232,7 +234,6 @@
   (org-hide-emphasis-markers t)
   (org-startup-with-inline-images t)
   (org-image-actual-width '(450))
-  (org-fold-catch-invisible-edits 'error)
   (org-pretty-entities t)
   (org-use-sub-superscripts "{}")
   (org-id-link-to-org-use-id t)
@@ -292,18 +293,6 @@
   :init
   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 
-;; Reading LibreOffice files
-
-;; Fixing a bug in Org Mode pre-9.7
-;; Org mode clobbers associations with office documents
-
-(use-package ox-odt
-  :ensure nil
-  :config
-  (add-to-list 'auto-mode-alist
-               '("\\.\\(?:OD[CFIGPST]\\|od[cfigpst]\\)\\'"
-                 . doc-view-mode-maybe)))
-
 ;; Managing Bibliographies
 
 (use-package bibtex
@@ -349,7 +338,8 @@
   (elfeed-org)
   :custom
   (rmh-elfeed-org-files
-   (list (concat (file-name-as-directory (getenv "HOME")) "elfeed.org"))))
+   (list (concat (file-name-as-directory (getenv "HOME"))
+		 "elfeed.org"))))
 
 ;; Easy insertion of weblinks
 
@@ -376,6 +366,8 @@
    ("<XF86AudioNext>" . emms-next)
    ("<XF86AudioPlay>" . emms-pause)))
 
+;; Open files with external applications
+
 (use-package openwith
   :config
   (openwith-mode t)
@@ -389,7 +381,6 @@
   (("C-c c" . org-capture)
    ("C-c l" . org-store-link))
   :custom
-  (org-goto-interface 'outline-path-completion)
   (org-capture-templates
    '(("f" "Fleeting note"
       item
@@ -413,33 +404,45 @@
   :custom
   (denote-sort-keywords t)
   (denote-link-description-function #'ews-denote-link-description-title-case)
+  (denote-rename-buffer-mode 1)
   :hook
   (dired-mode . denote-dired-mode)
   :custom-face
   (denote-faces-link ((t (:slant italic))))
-  :init
-  (require 'denote-org-extras)
   :bind
   (("C-c w d b" . denote-find-backlink)
    ("C-c w d d" . denote-date)
    ("C-c w d l" . denote-find-link)
-   ("C-c w d h" . denote-org-extras-link-to-heading)
    ("C-c w d i" . denote-link-or-create)
    ("C-c w d k" . denote-rename-file-keywords)
    ("C-c w d n" . denote)
    ("C-c w d r" . denote-rename-file)
    ("C-c w d R" . denote-rename-file-using-front-matter)))
 
+;; Denote auxiliary packages
+
+(use-package denote-journal)
+
+(use-package denote-org
+  :bind
+  (("C-c w d h" . denote-org-link-to-heading)))
+
+(use-package denote-sequence)
+
 ;; Consult convenience functions
 
 (use-package consult
   :bind
   (("C-c w h" . consult-org-heading)
-   ("C-c w g" . consult-grep)))
+   ("C-c w g" . consult-grep))
+  :config
+  (add-to-list 'consult-preview-allowed-hooks 'visual-line-mode))
 
 ;; Consult-Notes for easy access to notes
 
 (use-package consult-notes
+  :custom
+  (consult-notes-denote-display-keywords-indicator "_")
   :bind
   (("C-c w d f" . consult-notes)
    ("C-c w d g" . consult-notes-search-in-all-notes))
@@ -486,7 +489,7 @@
    ;; Visualise denote
    ("C-c w x n" . denote-explore-network)
    ("C-c w x v" . denote-explore-network-regenerate)
-   ("C-c w x D" . denote-explore-degree-barchart)))
+   ("C-c w x D" . denote-explore-barchart-degree)))
 
 ;; Set some Org mode shortcuts
 
@@ -504,15 +507,11 @@
   :bind
   (("C-c w o" . ews-olivetti)))
 
-;; Undo Tree
+;; Vundo
 
-(use-package undo-tree
-  :config
-  (global-undo-tree-mode)
-  :custom
-  (undo-tree-auto-save-history nil)
+(use-package vundo
   :bind
-  (("C-c w u" . undo-tree-visualise)))
+  (("C-M-/" . vundo)))
 
 ;; Export citations with Org Mode
 
@@ -524,7 +523,7 @@
       org-cite-follow-processor 'citar
       org-cite-activate-processor 'citar)
 
-;; Lookup words in the online dictionary
+;; Lookup words in online dictionaries
 
 (use-package dictionary
   :custom
@@ -532,16 +531,11 @@
   :bind
   (("C-c w s d" . dictionary-lookup-definition)))
 
-(use-package powerthesaurus
-  :bind
-  (("C-c w s p" . powerthesaurus-transient)))
-
 ;; Writegood-Mode for weasel words, passive writing and repeated word detection
 
 (use-package writegood-mode
   :bind
-  (("C-c w s r" . writegood-reading-ease)
-   ("C-c w s l" . writegood-grade-level))
+  (("C-c w s r" . writegood-reading-ease))
   :hook
   (text-mode . writegood-mode))
 
@@ -578,12 +572,10 @@
 
 ;; Enable Other text modes
 
-;; Fontain mode for writing scrits
-
-(use-package fountain-mode)
-
+;; Fountain mode for writing scripts
 ;; Markdown mode
 
+(use-package fountain-mode)
 (use-package markdown-mode)
 
 ;; PUBLICATION
@@ -631,27 +623,28 @@
    'org-latex-classes
    '("ews"
      "\\documentclass[11pt, twoside, hidelinks]{memoir}
-      \\setstocksize{9.25in}{7.5in}
-      \\settrimmedsize{\\stockheight}{\\stockwidth}{*}
-      \\setlrmarginsandblock{2cm}{1cm}{*} 
-      \\setulmarginsandblock{1.5cm}{2.25cm}{*}
-      \\checkandfixthelayout
-      \\setcounter{tocdepth}{0}
-      \\OnehalfSpacing
-      \\usepackage{ebgaramond}
-      \\usepackage[htt]{hyphenat}
-      \\chapterstyle{bianchi}
-      \\setsecheadstyle{\\normalfont \\raggedright \\textbf}
-      \\setsubsecheadstyle{\\normalfont \\raggedright \\textbf}
-      \\setsubsubsecheadstyle{\\normalfont\\centering}
-      \\renewcommand\\texttt[1]{{\\normalfont\\fontfamily{cmvtt}
-        \\selectfont #1}}
-      \\usepackage[font={small, it}]{caption}
-      \\pagestyle{myheadings}
-      \\usepackage{ccicons}
-      \\usepackage[authoryear]{natbib}
-      \\bibliographystyle{apalike}
-      \\usepackage{svg}"
+        \\setstocksize{9.25in}{7.5in}
+        \\settrimmedsize{\\stockheight}{\\stockwidth}{*}
+        \\setlrmarginsandblock{1.5in}{1in}{*} 
+        \\setulmarginsandblock{1in}{1.5in}{*}
+        \\checkandfixthelayout
+        \\layout
+        \\setcounter{tocdepth}{0}
+        \\renewcommand{\\baselinestretch}{1.25}
+        \\setheadfoot{0.5in}{0.75in}
+        \\setlength{\\footskip}{0.8in}
+        \\chapterstyle{bianchi}
+        \\setsecheadstyle{\\normalfont \\raggedright \\textbf}
+        \\setsubsecheadstyle{\\normalfont \\raggedright \\emph}
+        \\setsubsubsecheadstyle{\\normalfont\\centering}
+        \\pagestyle{myheadings}
+        \\usepackage[font={small, it}]{caption}
+        \\usepackage{ccicons}
+        \\usepackage{ebgaramond}
+        \\usepackage[authoryear]{natbib}
+        \\bibliographystyle{apalike}
+        \\usepackage{svg}
+\\hyphenation{mini-buffer}"
      ("\\chapter{%s}" . "\\chapter*{%s}")
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -743,6 +736,18 @@
         ("C-<right>" . image-dired-display-next)
         ("C-<left>"  . image-dired-display-previous)))
 
+;; Bind key for customising variables
+
+(keymap-global-set "C-c w v" 'customize-variable)
+
+;; Custom settings in a separate file and load the custom settings
+
+(setq-default custom-file (expand-file-name
+			     "custom.el"
+			     user-emacs-directory))
+
+(load custom-file :no-error-if-file-is-missing)
+
 ;; Load Extra
 
 (load-file (concat (file-name-as-directory user-emacs-directory) "evil.el"))
@@ -752,6 +757,7 @@
 
 ;; Use GraphViz for flow diagrams
 ;; requires GraphViz software
+
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((dot . t))) ; this line activates GraophViz dot
+ '((dot . t)))

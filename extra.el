@@ -1,134 +1,81 @@
-;;; extra.el --- Description -*- lexical-binding: t; -*-
+;;; extra.el --- Korean environment, fonts and small additions -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2025 Junghan Kim
+;; Copyright (C) 2025-2026 Junghan Kim
 ;;
 ;; Author: Junghan Kim <junghanacs@gmail.com>
-;; Maintainer: Junghan Kim <junghanacs@gmail.com>
-;; Created: January 06, 2025
-;; Modified: January 06, 2025
-;; Version: 0.0.1
-;; Keywords: abbrev bib c calendar comm convenience data docs emulations extensions faces files frames games hardware help hypermedia i18n internal languages lisp local maint mail matching mouse multimedia news outlines processes terminals tex text tools unix vc wp
-;; Homepage: https://github.com/junghan0611/extra
-;; Package-Requires: ((emacs "24.3"))
+;; URL: https://github.com/junghan0611/neomacs-config
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; Commentary:
 ;;
-;;  Description
+;; Loaded last from init.el.  Values (fonts, paths) come from user-info.el;
+;; longer package configs live in lisp/.
 ;;
 ;;; Code:
 
-;;;; Hangul Korean
+;;;; Korean environment
 
-(progn
-  (setq default-input-method "korean-hangul")
-  (set-language-environment "Korean")
-  (set-keyboard-coding-system 'utf-8)
-  (setq locale-coding-system  'utf-8)
-  (prefer-coding-system 'utf-8)
-  (set-charset-priority 'unicode)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (setq-default buffer-file-coding-system 'utf-8-unix)
+(set-language-environment "Korean")
+(prefer-coding-system 'utf-8)
+(set-charset-priority 'unicode)
+(set-default-coding-systems 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(setq locale-coding-system 'utf-8)
+(setq-default buffer-file-coding-system 'utf-8-unix)
 
-  (set-selection-coding-system 'utf-8) ;; important
+;; Clipboard: UTF-8 first, then compound text.
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-  ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
-  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+;; English day names in Org timestamps.
+(setq system-time-locale "C")
 
-  (setq-default line-spacing 3) ; use fontaine
+(setq default-input-method "korean-hangul"
+      input-method-verbose-flag nil
+      input-method-highlight-flag nil)
+(keymap-global-set "S-SPC" #'toggle-input-method)
+(keymap-global-set "<Hangul>" #'toggle-input-method)
 
-  ;; (setenv "LANG" "en_US.UTF-8")
-  ;; (setenv "LC_ALL" "en_US.UTF-8")
-  ;; (setenv "LANG" "ko_KR.UTF-8")
+;;;; Fonts
 
-  ;; 날짜 표시를 영어로한다. org mode에서 time stamp 날짜에 영향을 준다.
-  (setq system-time-locale "C")
+;; Column check — both halves must line up:
+;; +------------+------------+
+;; | 일이삼사오 | 일이삼사오 |
+;; | ABCDEFGHIJ | ABCDEFGHIJ |
+;; | 1234567890 | 1234567890 |
+;; +------------+------------+
 
-  (setq input-method-verbose-flag nil
-        input-method-highlight-flag nil)
+;; Applied per frame so a daemon's later GUI frames get them too; a no-op on
+;; TTY frames.
+(defun my/setup-fonts (&optional frame)
+  (when (display-graphic-p (or frame (selected-frame)))
+    (set-face-attribute 'default frame
+                        :family user-font-family :height user-font-height)
+    (set-fontset-font t 'hangul (font-spec :family user-font-family) frame)
+    (set-fontset-font t 'emoji (font-spec :family user-emoji-family) frame)
+    (set-fontset-font t 'symbol (font-spec :family "Symbola") frame)
+    (set-fontset-font t 'symbol (font-spec :family "Noto Sans Symbols 2") frame 'prepend)
+    (set-fontset-font t 'symbol (font-spec :family "Noto Sans Symbols") frame 'prepend)))
 
-  (global-set-key (kbd "<S-SPC>") 'toggle-input-method)
-  ;; (global-set-key (kbd "<Alt_R>") 'toggle-input-method)
-  (global-set-key (kbd "<Hangul>") 'toggle-input-method)
-  ;; (global-unset-key (kbd "S-SPC"))
+(my/setup-fonts)
+(add-hook 'after-make-frame-functions #'my/setup-fonts)
 
-  ;; +------------+------------+
-  ;; | 일이삼사오 | 일이삼사오 |
-  ;; +------------+------------+
-  ;; | ABCDEFGHIJ | ABCDEFGHIJ |
-  ;; +------------+------------+
-  ;; | 1234567890 | 1234567890 |
-  ;; +------------+------------+
-  ;; | 일이삼사오 | 일이삼사오 |
-  ;; | abcdefghij | abcdefghij |
-  ;; +------------+------------+
+;;;; Themes
 
+;; One theme at a time: disable the rest before loading another.
+(defun +load-theme-disable-others-a (&rest _)
+  (mapc #'disable-theme custom-enabled-themes))
+(advice-add 'load-theme :before #'+load-theme-disable-others-a)
 
-  (when (display-graphic-p)
-    (set-face-attribute 'default nil :family "Monoplex KR Nerd" :width 'normal :weight 'regular :height 140)
-    (set-fontset-font nil 'hangul (font-spec :family "Monoplex KR Nerd"))
-    ;; (set-face-attribute 'fixed-pitch nil :family "Sarasa Term K" :width 'normal :weight 'regular)
-    ;; (set-face-attribute 'fixed-pitch-serif nil :family "Hahmlet" :width 'normal :weight 'regular)
-    ;; (set-face-attribute 'variable-pitch nil :family "Pretendard Variable"
-    ;;                     :width 'normal :weight 'regular)
+;;;; Packages
 
-    (set-fontset-font t 'emoji (font-spec :family "Noto Color Emoji") nil)
-    (set-fontset-font t 'emoji (font-spec :family "Noto Emoji") nil 'prepend) ; Top
+(use-package yasnippet :defer t)
+(use-package wgrep :defer t)
+(use-package transpose-frame :defer t)
 
-    (set-fontset-font t 'symbol (font-spec :family "Symbola") nil)
-    (set-fontset-font t 'symbol (font-spec :family "Noto Sans Symbols 2") nil 'prepend)
-    (set-fontset-font t 'symbol (font-spec :family "Noto Sans Symbols") nil 'prepend)
-    )
-
-  (defvar after-load-theme-hook nil
-    "Hook run after a color theme is loaded using `load-theme'.")
-
-  (defun load-theme@run-hooks (&rest _)
-    "Run `after-load-theme-hook'."
-    (run-hooks 'after-load-theme-hook))
-  (advice-add 'load-theme :after #'load-theme@run-hooks)
-
-  (defun load-theme@theme-dont-propagate (&rest _)
-    "Discard all themes before loading new."
-    (mapc #'disable-theme custom-enabled-themes))
-  (advice-add #'load-theme :before #'load-theme@theme-dont-propagate)
-  )
-
-;;;; ccmenu with casual-suite
-
-;; (use-package google-this
-;;   :init (setq google-this-location-suffix "co.kr"))
-
-(use-package webpaste
-  :bind (("C-c C-p C-b" . webpaste-paste-buffer)
-         ("C-c C-p C-r" . webpaste-paste-region)
-         ("C-c C-p C-p" . webpaste-paste-buffer-or-region)))
-
-(use-package google-translate
-  :config
-  (setq google-translate-translation-directions-alist
-        '(("ko" . "en") ("en" . "ko"))))
-
-(use-package yasnippet)
-;; (use-package ace-window)
-(use-package wgrep)
-(use-package transpose-frame)
-
-(use-package casual-suite
-  :defer 2
-  :config
-  (add-to-list 'load-path (concat user-emacs-directory "ccmenu/"))
-  (require 'ccmenu))
-
-;;;; Temporarly
-
-(modus-themes-toggle)
-(spacious-padding-mode -1)
-
-(menu-bar-mode 1)
-(tool-bar-mode 1)
-(tooltip-mode 1)
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+(require 'casual-config)
 
 ;;; extra.el ends here
