@@ -17,17 +17,11 @@
 
 ## NOW
 
-- `./run.sh neo` 터미널 소음 제거 — `RUST_LOG`로 커서 진단(갈라짐 7) 끄기, AppImage일 때
-  `GIO_EXTRA_MODULES` 해제. GLG 실화면 확인 "좋다".
-- **덜어내기 (GLG 방침: 어설프게 화려한 것·폰트 이것저것은 여기서 안 한다):**
-  org의 `mixed-pitch-mode`·`org-modern-mode` 자동 켜기 제거(`init.el`, 패키지는 남김),
-  `extra.el` 마지막에 `(modus-themes-toggle)` → `modus-operandi-tinted`. 양쪽 실측 일치.
-- 마지막 `./run.sh check-all` (2026-09-27): gnu rc=0 / neo rc=0. 둘 다 `<f1>` =
-  `casual-editkit-main-tmenu`, `*Warnings*` 비어 있음. init-time gnu 3.87s / neo 1.32s
-  (neo는 native-comp 없음, 같은 비교 아님). 실행 뒤 `recentf.eld`·`history` 동일.
-- 이번에 바뀐 것: `run.sh`(Xvfb 기반 check, 상태 파일 보호), `my/neomacs-p`,
-  `elpa-neomacs/`, `neomacs.el`, eln-cache를 프로파일 안으로, Casual 즉시 로드,
-  EWS 분기 방침을 AGENTS/README에.
+- **`v2026.9.27` 컷** — 닫힌 일은 [CHANGELOG.md](CHANGELOG.md)로 옮겼다.
+- **다음 한 걸음: RAIL 6 준비** — EWS 불필요 패키지 정리(GLG가 목록을 본다). 방침:
+  어설프게 화려한 것·폰트 이것저것은 이 리포에서 하지 않는다.
+- baseline: `./run.sh check-all` gnu rc=0 / neo rc=0, `<f1>` = `casual-editkit-main-tmenu`,
+  테마 `modus-operandi-tinted`, org에 mixed-pitch·org-modern 없음 (2026-09-27).
 
 ## Neomacs 갈라짐 (이 리포 실측, Neomacs 0.0.19 vs GNU 31.1)
 
@@ -56,7 +50,6 @@ upstream 보고는 하지 않는다 (GLG). 우회는 `neomacs.el`에만.
 
 ## 다듬을 후보
 
-- **EWS 불필요 패키지 정리** — GLG가 보고 있음, 아직 손대지 않는다.
 - 이 프로파일이 예전에 native-compile한 `.eln`이 `~/.config/emacs/eln-cache/`(Doom 쪽)에
   남아 있다. 해는 없고, Doom 것과 섞여 있어 지우지 않았다.
 - `.ignore`(GLG): rg 실측 — 리포 안·부모 디렉토리 검색 모두 `.gitignore`가 이미
