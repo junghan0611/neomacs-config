@@ -71,9 +71,7 @@
             (lambda () (evil-collection-unimpaired-mode -1))))
 
 (use-package evil-nerd-commenter
-  :after evil
-  :config
-  (evilnc-default-hotkeys))
+  :after evil)
 
 (use-package evil-escape
   :after evil
