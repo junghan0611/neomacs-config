@@ -116,8 +116,7 @@
 ;; Mixed-pitch mode
 
 (use-package mixed-pitch
-  :hook
-  (org-mode . mixed-pitch-mode))
+  :defer t)
 
 ;; Window management
 ;; Split windows sensibly
@@ -261,8 +260,7 @@
 ;; Org modern: Most features are disabled for beginning users
 
 (use-package org-modern
-  :hook
-  (org-mode . org-modern-mode)
+  :defer t
   :custom
   (org-modern-table nil)
   (org-modern-keyword nil)

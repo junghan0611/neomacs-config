@@ -10,15 +10,18 @@
 - [x] **2. GNU Emacs 31.1 헤드리스 green** (2026-09-26)
 - [x] **3. 리포 재건** (2026-09-26) — GLG GUI 실사용 "잘 된다"
 - [x] **4. 이름 변경** (2026-09-27) — GitHub·`origin`·로컬 경로 모두 `neomacs-config`
-- [ ] **5. Neomacs 커버** ← CURRENT: 헤드리스 green 양쪽. GLG GUI 판정 대기
+- [x] **5. Neomacs 커버** (2026-09-27) — 헤드리스 green 양쪽, GLG GUI 판정 "둘 다
+      동작은 잘 된다". **Neomacs 검수의 주인은 이 리포** (GLG)
 - [ ] **6. 메인 전환 + 범용 샘플화** — GLG가 이 리포를 메인으로 쓴다(Casual 기본).
       자리잡으면 GLG 층을 영어로, 사용자 가이드. doomemacs-config는 레퍼런스일 뿐
 
 ## NOW
 
-- **다음 한 걸음: GLG GUI 판정** — `./run.sh neo`와 `./run.sh`를 나란히 띄워 본다.
-  볼 것: `<f1>` Casual 메뉴, 한글 입력(`S-SPC`), 폰트, 메뉴바(`menu-bar-mode -1`이
-  Neomacs에서 먹는지), 커서.
+- `./run.sh neo` 터미널 소음 제거 — `RUST_LOG`로 커서 진단(갈라짐 7) 끄기, AppImage일 때
+  `GIO_EXTRA_MODULES` 해제. GLG 실화면 확인 "좋다".
+- **덜어내기 (GLG 방침: 어설프게 화려한 것·폰트 이것저것은 여기서 안 한다):**
+  org의 `mixed-pitch-mode`·`org-modern-mode` 자동 켜기 제거(`init.el`, 패키지는 남김),
+  `extra.el` 마지막에 `(modus-themes-toggle)` → `modus-operandi-tinted`. 양쪽 실측 일치.
 - 마지막 `./run.sh check-all` (2026-09-27): gnu rc=0 / neo rc=0. 둘 다 `<f1>` =
   `casual-editkit-main-tmenu`, `*Warnings*` 비어 있음. init-time gnu 3.87s / neo 1.32s
   (neo는 native-comp 없음, 같은 비교 아님). 실행 뒤 `recentf.eld`·`history` 동일.
@@ -38,6 +41,7 @@ upstream 보고는 하지 않는다 (GLG). 우회는 `neomacs.el`에만.
 | 4 | `dbus-register-service` → `"Not a valid D-Bus event"` | `(dbus-register-service :session "org.mpris.MediaPlayer2.x")` | 기록만 |
 | 5 | `--daemon=NAME` → `Unknown option`, GUI로 계속. 디스플레이 없으면 기동 불가 | 기동 로그 | `check`를 Xvfb로 |
 | 6 | Neomacs가 컴파일한 casual `.elc` 7개 로드 실패 `(void-variable lambda)`, `.el`은 정상. 전수 점검: 다른 `.elc` 337개는 정상 | `elpa-neomacs/`의 모든 `.elc` `require` | casual만 컴파일 생략 + `.elc` 삭제 |
+| 7 | 렌더러 진단 `cursor_glyph_mismatch`가 다시 그릴 때마다 ERROR — `line-spacing`이 있으면 커서(글자 높이)와 cell(줄 간격 포함)이 어긋남. 화면상 문제 없음 | `-Q`, 문자 위 커서: `line-spacing` nil 0건 / 3 → 5초에 7건, `cursor=…9.0x22.0 cell=…9.0x25.0` | `run.sh`가 `RUST_LOG=…glyphs=off` |
 | — | 패키지 설치 중 D-Bus panic 2회 관측 (1회 종료, 1회 비치명) | 첫 설치 로그 | 원인 미확정, 재설치 시 재관측 |
 
 - Neomacs 버전을 올리면: `elpa-neomacs/` 지우고 `./run.sh neo check`, 그리고 `.elc`
@@ -45,9 +49,8 @@ upstream 보고는 하지 않는다 (GLG). 우회는 `neomacs.el`에만.
 
 ## GLG가 정할 것
 
-- **Neomacs 검수 기록의 주인.** 제안: 설정 축(ELPA·GUI·일상)은 이 리포,
-  맨몸 축(빌트인·프로브)은 `doomemacs-config/neomacs/`.
-- **doomemacs-config 쪽 발견 전달 여부:** 그쪽 `neomacs/init.el:37`의 `my/neomacs-p`는
+- **doomemacs-config 쪽에 알릴지:** Neomacs 주인이 이 리포가 됐다는 것(그쪽
+  `neomacs/README.md`가 아직 측정 SSOT를 자처). 그리고 그쪽 `neomacs/init.el:37`의 `my/neomacs-p`는
   `(emacs-version)`에서 "neomacs"를 찾는데 0.0.13·0.0.19 모두 없어 항상 nil.
   담당자 `20260926T171827-7d0a7f`. 이 리포에서는 손대지 않는다.
 

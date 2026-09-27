@@ -19,6 +19,9 @@ on its way to being GLG's main Emacs.
   The same profile runs on GNU Emacs 31 and on Neomacs; GNU is the baseline.
   Formerly `ews-config`; GitHub is <https://github.com/junghan0611/neomacs-config>,
   local directory `~/repos/gh/neomacs-config`.
+- **This repo owns Neomacs validation** (since 2026-09-27): findings, workarounds and
+  their measurements live here (`neomacs.el`, `NEXT.md`). `doomemacs-config/neomacs/`
+  is an older builtin-only probe set, useful as a reference, not the record.
 - **doomemacs-config is a reference, not a template.** Borrow values and ideas from it,
   but keep this repo's structure generic: the goal is a sample profile other people can
   adopt. The GLG layer is Korean-first while Neomacs is being validated; once it
@@ -98,7 +101,9 @@ Workarounds for Neomacs go into `neomacs.el`, never into the shared files.
 - **`check` isolates HOME, not the profile.** State files (`recentf.eld`, `history`,
   bookmarks) live in this repo and are GLG's real ones. `check` exits with
   `kill-emacs-hook` unbound (recentf would otherwise prune every `~/` path) and restores
-  a snapshot afterwards (savehist also saves on a 5-minute timer). Keep both.
+  a snapshot afterwards (savehist also saves on a 5-minute timer). Keep both. Ad-hoc
+  probes against this profile follow the same rule: exit with `kill-emacs-hook` unbound,
+  and use `timeout --signal=KILL` — plain `timeout` sends SIGTERM, which runs the hooks.
 - **A check must never open a window on GLG's screen.** Neomacs 0.0.19 needs a display
   even for `--daemon`, and rejects `--daemon=NAME` as an unknown option, then carries on
   as a normal GUI session. That is why `check` uses Xvfb, not a daemon.

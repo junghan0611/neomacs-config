@@ -79,9 +79,20 @@ resolve_runner() {
 				else
 					RUNNER=(nix run nixpkgs#appimage-run -- "${APPIMAGE}")
 				fi
+				# The host's GIO modules (dconf, gvfs) are built against a newer
+				# GLib than the AppImage bundles, so every start prints
+				# "Failed to load module" for each of them.
+				unset GIO_EXTRA_MODULES
 			else
 				die "no Neomacs found (NEOMACS_BIN, neomacs on PATH, ${APPIMAGE}). Run: $0 fetch"
 			fi
+			# Neomacs logs to stdout, filtered by RUST_LOG (default: warn).  Its
+			# renderer checks that the cursor fills the character cell and logs
+			# an ERROR on every redraw when it does not -- which is always the
+			# case with `line-spacing' set (init.el sets 3): the cursor covers
+			# the text height and the cell includes the line spacing.  Nothing
+			# looks wrong on screen.  Silence that check unless RUST_LOG is set.
+			export RUST_LOG="${RUST_LOG:-warn,neomacs_renderer_wgpu::renderer::glyphs=off}"
 			# Bypass the toolkit IME (fcitx5 etc.) so Korean input is Neomacs'
 			# own builtin Hangul composition; a finding is then never
 			# confounded by the IME bridge.

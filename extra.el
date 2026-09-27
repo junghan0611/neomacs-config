@@ -87,4 +87,10 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (require 'casual-config)
 
+;;;; Theme
+
+;; Last, so every face defined during startup gets it: loads the first of
+;; `modus-themes-to-toggle' (set in init.el).
+(modus-themes-toggle)
+
 ;;; extra.el ends here
