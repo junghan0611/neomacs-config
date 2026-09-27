@@ -34,6 +34,14 @@ on its way to being GLG's main Emacs.
   it, so `lisp/casual-config.el` loads it at startup and `<f1>` must open a Casual menu
   on both runtimes. `check` reports the `<f1>` binding.
 
+## Steward note
+
+This repo's public steward note (담당자 문서) is Denote `20260529T084444` in GLG's garden
+(`~/org/botlog/20260529T084444--§neomacs-config-*.org`). Stewards of other repos read it to
+learn what this house owns and refuses. Keep it current: when the posture changes — a
+release cut, a change of ownership, a boundary moved — add a 히스토리 line and a dated
+현재 보고 heading through the `botlog` skill. Update that note; never start a second one.
+
 ## Layout — EWS-derived vs GLG layer
 
 | File | Owner | Role |
@@ -115,6 +123,10 @@ Workarounds for Neomacs go into `neomacs.el`, never into the shared files.
 - **Neomacs-compiled byte code can be broken.** 7 of casual's `.elc` files fail with
   `(void-variable lambda)`; `neomacs.el` keeps casual uncompiled on Neomacs. After a
   Neomacs version bump, re-audit by loading every `.elc` in `elpa-neomacs/`.
+- **`gh` can pick upstream EWS as the default repo.** With the `upstream` remote present,
+  `gh release create` resolved to `pprevos/emacs-writing-studio` and refused. Pass
+  `-R junghan0611/neomacs-config`, or run `gh repo set-default junghan0611/neomacs-config`
+  once per clone.
 - **Org tables with links diverge on Neomacs.** `org-table-align` sizes a link by its
   raw `[[...][...]]` text, so aligning rewrites the table wider (see `neomacs.el`).
 

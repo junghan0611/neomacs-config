@@ -41,12 +41,14 @@ upstream 보고는 하지 않는다 (GLG). 우회는 `neomacs.el`에만.
 - Neomacs 버전을 올리면: `elpa-neomacs/` 지우고 `./run.sh neo check`, 그리고 `.elc`
   전수 점검을 다시.
 
-## GLG가 정할 것
+## 이웃과의 경계 (2026-09-27)
 
-- **doomemacs-config 쪽에 알릴지:** Neomacs 주인이 이 리포가 됐다는 것(그쪽
-  `neomacs/README.md`가 아직 측정 SSOT를 자처). 그리고 그쪽 `neomacs/init.el:37`의 `my/neomacs-p`는
-  `(emacs-version)`에서 "neomacs"를 찾는데 0.0.13·0.0.19 모두 없어 항상 nil.
-  담당자 `20260926T171827-7d0a7f`. 이 리포에서는 손대지 않는다.
+- doomemacs-config 담당자(`20260927T150410-da86cf`)에게 전달 완료: 검수 주인 이관,
+  `my/neomacs-p` 항상 nil, `--daemon=NAME` 거부, `~/doomemacs/eln-cache/`(31M) 전부 우리 것.
+  그쪽 회신: `neomacs/init.el`을 `fboundp neomacs-core-backend`로, `bin/neomacs.sh`
+  `--daemon`/`--kill`은 fail-closed, AGENTS·README에 주인 이관 반영 — **그쪽 미커밋**.
+  eln-cache 삭제는 그쪽 판단.
+- 담당자 문서: Denote `20260529T084444` (AGENTS.md "Steward note"). 컷·경계가 바뀌면 갱신.
 
 ## 다듬을 후보
 
