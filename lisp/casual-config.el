@@ -20,15 +20,15 @@
 ;; M-<f1> exists only where upstream uses the secondary key — bibtex,
 ;; elisp, css, csv, html.
 ;;
-;; Cost: `casual-init' pulls in calc, bibtex, eww, man, esh-mode, ediff,
-;; re-builder and cus-edit through the module autoloads (measured in Doom
-;; 2026-08-22: 2.6-3.6s, +239 features), so it loads 5s after startup, on
-;; idle.  <f1> works from then on.
+;; Casual is this profile's main interface, so it loads at startup and
+;; <f1> works from the first frame.  `casual-init' pulls in calc, bibtex,
+;; eww, man, esh-mode, ediff, re-builder and cus-edit through the module
+;; autoloads; that cost is paid at startup.
 
 ;;; Code:
 
 (use-package casual
-  :defer 5
+  :demand t
   :init
   ;; Upstream defaults are C-o / M-m; C-o is evil's jump-back.
   (setq casual-keybinding-primary "<f1>"

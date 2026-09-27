@@ -75,6 +75,15 @@
 (use-package wgrep :defer t)
 (use-package transpose-frame :defer t)
 
+;;;; Neomacs
+
+;; Runtime-specific additions; GNU Emacs never loads them.  Loaded before
+;; lisp/ so its workarounds are in place when those packages load.
+(when my/neomacs-p
+  (load (expand-file-name "neomacs.el" user-emacs-directory) nil 'nomessage))
+
+;;;; Package configs
+
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (require 'casual-config)
 

@@ -5,50 +5,63 @@
 
 # RAIL — 현재 좌표
 
-- [x] **1. upstream EWS 동기화** (2026-09-26) — `upstream` 리모트 추가, 79 behind / 3 ahead
-      실측, `git merge --no-commit upstream/master`, `init.el` 충돌 1건 해결
-- [x] **2. GNU Emacs 31.1 헤드리스 green** (2026-09-26) — `./bin/ews.sh --check`:
-      `user-init-file` = 이 리포 `init.el`, `*Warnings*` 비어 있음, rc=0
-- [ ] **3. 리포 재건** ← CURRENT: GLG GUI 실사용 → 다듬기 → 머지 커밋 → 문서 정리
-- [~] **4. 이름 변경 `ews-config` → `neomacs-config`** — GitHub rename 완료, `origin`
-      갱신(2026-09-26). 로컬 디렉토리 이동과 런처 이름은 남음
-- [ ] **5. Neomacs 커버**
+- [x] **1. upstream EWS 동기화** (2026-09-26) — 머지 커밋 `66ced42`. 이후 EWS는
+      **분기**: 진짜 버그 수정만 cherry-pick (GLG 2026-09-27)
+- [x] **2. GNU Emacs 31.1 헤드리스 green** (2026-09-26)
+- [x] **3. 리포 재건** (2026-09-26) — GLG GUI 실사용 "잘 된다"
+- [x] **4. 이름 변경** (2026-09-27) — GitHub·`origin`·로컬 경로 모두 `neomacs-config`
+- [ ] **5. Neomacs 커버** ← CURRENT: 헤드리스 green 양쪽. GLG GUI 판정 대기
+- [ ] **6. 메인 전환 + 범용 샘플화** — GLG가 이 리포를 메인으로 쓴다(Casual 기본).
+      자리잡으면 GLG 층을 영어로, 사용자 가이드. doomemacs-config는 레퍼런스일 뿐
 
 ## NOW
 
-- **다음 한 걸음: 로컬 경로 `~/repos/gh/ews-config` → `~/repos/gh/neomacs-config`.**
-  GLG가 실행. Emacs 종료 → `mv` → `elpa/` 지우고 `./bin/ews.sh --check`로 재설치·green 확인.
-- GUI 실사용 판정: "잘 된다"(GLG, 2026-09-26). upstream 머지 + 재건은 머지 커밋으로 푸시됨.
-- 이번 세션에서 바뀐 것: `evil.el` 재정리(`hs-minor-mode-map nil` 제거 — Emacs 31 설치
-  파괴 원인, 중복 setq 정리, Doom `defadvice!` → `advice-add`, undo-fu → 내장
-  `undo-redo`), `extra.el` 재정리(GLG가 webpaste·google-translate·UI 덮어쓰기 제거,
-  `line-spacing` 중복 제거, `lisp/` load-path), `lisp/casual-config.el` Doom → 순정
-  이식(`<f1>` = `casual-editkit-main-tmenu` 실측). 신규 `early-init.el` / `user-info.el` /
-  `bin/ews.sh` / `AGENTS.md` / `CLAUDE.md`, `README.md` 재작성.
-- 마지막 `--check`: rc=0, `*Warnings*` 비어 있음 (2026-09-26).
+- **다음 한 걸음: GLG GUI 판정** — `./run.sh neo`와 `./run.sh`를 나란히 띄워 본다.
+  볼 것: `<f1>` Casual 메뉴, 한글 입력(`S-SPC`), 폰트, 메뉴바(`menu-bar-mode -1`이
+  Neomacs에서 먹는지), 커서.
+- 마지막 `./run.sh check-all` (2026-09-27): gnu rc=0 / neo rc=0. 둘 다 `<f1>` =
+  `casual-editkit-main-tmenu`, `*Warnings*` 비어 있음. init-time gnu 3.87s / neo 1.32s
+  (neo는 native-comp 없음, 같은 비교 아님). 실행 뒤 `recentf.eld`·`history` 동일.
+- 이번에 바뀐 것: `run.sh`(Xvfb 기반 check, 상태 파일 보호), `my/neomacs-p`,
+  `elpa-neomacs/`, `neomacs.el`, eln-cache를 프로파일 안으로, Casual 즉시 로드,
+  EWS 분기 방침을 AGENTS/README에.
 
-## 다듬을 후보 (GLG 실사용 피드백 대기)
+## Neomacs 갈라짐 (이 리포 실측, Neomacs 0.0.19 vs GNU 31.1)
 
-- `elpa/undo-fu-*`, `elpa/casual-suite-*`, webpaste, google-translate 는 더 안 쓴다.
-  `elpa/` 정리는 이름 변경 때 재설치로 같이.
-- 맞춤법: `ews-hunspell-dictionaries` = `ko_KR` (기기에 설치된 유일한 사전). 영문 사전을
-  원하면 `nixos-config` 레인에서 `en_US` 추가가 먼저.
-- EWS 외부 도구 누락: `ddjvu`, `pdftotext` (기동 로그 `Missing executable files`).
-- 리포 루트에 생기는 상태 파일(`emms/`, `history`, `bookmarks` 등)이 `.gitignore`에
-  다 걸리는지 GUI 사용 후 `git status`로 확인.
+upstream 보고는 하지 않는다 (GLG). 우회는 `neomacs.el`에만.
+
+| # | 무엇 | 재현 | 상태 |
+|---|---|---|---|
+| 1 | `emacs-version`이 `"GNU Emacs 31.1 …"` — 식별 불가 (0.0.13도 동일) | `--batch --eval '(princ (emacs-version))'` | `(fboundp 'neomacs-core-backend)` |
+| 2 | org 표 안 링크를 원시 폭으로 정렬 | `-Q`, org 9.8.7: 둘째 행 GNU 13자 / Neomacs 38자 | 버퍼당 1회 경고 |
+| 3 | EMMS MPRIS Player 인터페이스 D-Bus 등록 → panic, 프로세스 종료 (`dbus-0.9.11 strings.rs:187 "Unknown typecode"`) | `-Q -L <emms>`로 `(emms-mpris-register-iface emms-mpris-player-iface-spec)` | `emms-mpris-enable` 무력화 |
+| 4 | `dbus-register-service` → `"Not a valid D-Bus event"` | `(dbus-register-service :session "org.mpris.MediaPlayer2.x")` | 기록만 |
+| 5 | `--daemon=NAME` → `Unknown option`, GUI로 계속. 디스플레이 없으면 기동 불가 | 기동 로그 | `check`를 Xvfb로 |
+| 6 | Neomacs가 컴파일한 casual `.elc` 7개 로드 실패 `(void-variable lambda)`, `.el`은 정상. 전수 점검: 다른 `.elc` 337개는 정상 | `elpa-neomacs/`의 모든 `.elc` `require` | casual만 컴파일 생략 + `.elc` 삭제 |
+| — | 패키지 설치 중 D-Bus panic 2회 관측 (1회 종료, 1회 비치명) | 첫 설치 로그 | 원인 미확정, 재설치 시 재관측 |
+
+- Neomacs 버전을 올리면: `elpa-neomacs/` 지우고 `./run.sh neo check`, 그리고 `.elc`
+  전수 점검을 다시.
+
+## GLG가 정할 것
+
+- **Neomacs 검수 기록의 주인.** 제안: 설정 축(ELPA·GUI·일상)은 이 리포,
+  맨몸 축(빌트인·프로브)은 `doomemacs-config/neomacs/`.
+- **doomemacs-config 쪽 발견 전달 여부:** 그쪽 `neomacs/init.el:37`의 `my/neomacs-p`는
+  `(emacs-version)`에서 "neomacs"를 찾는데 0.0.13·0.0.19 모두 없어 항상 nil.
+  담당자 `20260926T171827-7d0a7f`. 이 리포에서는 손대지 않는다.
+
+## 다듬을 후보
+
+- **EWS 불필요 패키지 정리** — GLG가 보고 있음, 아직 손대지 않는다.
+- 이 프로파일이 예전에 native-compile한 `.eln`이 `~/.config/emacs/eln-cache/`(Doom 쪽)에
+  남아 있다. 해는 없고, Doom 것과 섞여 있어 지우지 않았다.
+- `.ignore`(GLG): rg 실측 — 리포 안·부모 디렉토리 검색 모두 `.gitignore`가 이미
+  `elpa/`·`elfeed/`를 거른다. `.ignore`는 `--no-ignore-vcs`나 git 밖 복사본에서만
+  효과가 있고, 그땐 `backups/`·`custom.el`·`elpa-neomacs/`·`eln-cache/`가 샌다.
+- `check`는 idle 2초에 보고 — 지연 로드는 안 본다. Casual은 이제 즉시 로드라 잡힌다.
+- 맞춤법: `ews-hunspell-dictionaries` = `ko_KR`. 영문 사전은 `nixos-config` 레인 먼저.
+- EWS 외부 도구 누락: `ddjvu`, `pdftotext`. `ews.el`의 `if-let` obsolete(31.1).
+- `custom.el`의 `package-selected-packages`에 안 쓰는 패키지(undo-fu, webpaste,
+  google-translate, casual-suite) 잔존.
 - `origin/master`, `origin/oldwin` 옛 브랜치 정리 여부.
-
-## 4단계 — 이름 변경 시 주의
-
-- GitHub rename은 끝. 로컬 디렉토리 이동은 GLG가 실행 시점을 정한다.
-- 실행 중인 Emacs가 이 디렉토리를 `--init-directory`로 쓰고 있으면 이동 전에 종료.
-- `elpa/` 안 `.elc` / autoload는 절대경로를 품으므로 이동 후 `elpa/` 재설치가 안전.
-- `README.md` / `AGENTS.md` 이름은 갱신됨. `bin/ews.sh` 런처 이름은 남음.
-
-## 5단계 — Neomacs (지금은 보류, 재건 후)
-
-- 출발점: `~/repos/gh/doomemacs-config/neomacs/` 프로파일과 `bin/neomacs.sh`.
-  그쪽 로직(AppImage 러너 해석, 폰트 명시 설정, 배치 프로브)을 이 리포로 가져오는 방향.
-  측정 SSOT는 `doomemacs-config/neomacs/README.md`. 문의는 doomemacs-config 담당자.
-- `elpa/`를 런타임별로 분리할지 결정 (GNU/Neomacs가 같은 `.elc`를 공유하면 안 될 수 있음).
-- GNU에서 green인 것만 Neomacs로 넘긴다 — 갈라짐 귀속을 위해.
