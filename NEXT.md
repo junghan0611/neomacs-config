@@ -22,6 +22,12 @@
   어설프게 화려한 것·폰트 이것저것은 이 리포에서 하지 않는다.
 - baseline: `./run.sh check-all` gnu rc=0 / neo rc=0, `<f1>` = `casual-editkit-main-tmenu`,
   테마 `modus-operandi-tinted`, org에 mixed-pitch·org-modern 없음 (2026-09-27).
+- Neomacs 렌더러 이펙트 끔 (2026-09-28): 기본 on 6개 중 cursor-motion,
+  cursor-color-cycle, 창 애니메이션(master switch)을 `neomacs.el`에서 끔. check-all green,
+  프로파일 기동 뒤 `neomacs-effect-get`으로 적용 확인. GLG GUI 판정 "좋아졌다".
+- `M-e` = `C-c w` 같은 키맵(`extra.el`), gptel 기본(`lisp/gptel-config.el`: OpenAI-sub OAuth,
+  gpt-6-sol/luna, gptel 버퍼 normal RET 전송 안 함). 양쪽 프로브 확인, GLG 로그인·대화 확인
+  (토큰은 `.cache/`, gitignore).
 
 ## Neomacs 갈라짐 (이 리포 실측, Neomacs 0.0.19 vs GNU 31.1)
 

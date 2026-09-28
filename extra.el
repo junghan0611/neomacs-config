@@ -62,6 +62,20 @@
 (my/setup-fonts)
 (add-hook 'after-make-frame-functions #'my/setup-fonts)
 
+;;;; Keys
+
+;; M-e opens the EWS prefix directly: the same keymap as C-c w, so every
+;; binding under C-c w, including ones added later, is reachable here.
+;; M-e was `forward-sentence'; Evil's ) covers that.
+(keymap-global-set "M-e" (keymap-lookup global-map "C-c w"))
+(with-eval-after-load 'which-key
+  (pcase-dolist (`(,key . ,name)
+                 '(("" . "Emacs Writing Studio") (" b" . "Bibliographic")
+                   (" d" . "Denote") (" m" . "Multimedia")
+                   (" s" . "Spelling and Grammar") (" t" . "Themes")
+                   (" x" . "Explore")))
+    (which-key-add-key-based-replacements (concat "M-e" key) name)))
+
 ;;;; Themes
 
 ;; One theme at a time: disable the rest before loading another.
@@ -86,6 +100,7 @@
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (require 'casual-config)
+(require 'gptel-config)
 
 ;;;; Theme
 
