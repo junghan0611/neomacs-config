@@ -93,4 +93,27 @@
               (expand-file-name "casual-[0-9]*" package-user-dir)))
   (mapc #'delete-file (directory-files dir t "\\.elc\\'")))
 
+;;;; Renderer effects off
+
+;; Of the 159 renderer effects `neomacs-effect-names' lists, six are on
+;; by default (measured with -Q under Xvfb, `neomacs-effect-get'):
+;; cursor-blink, cursor-motion (a sliding cursor with a trail),
+;; cursor-color-cycle (a cursor whose colour keeps changing), and the
+;; window-open / -resize / -movement animations.  This profile wants a
+;; plain editor, so all but cursor-blink go.  cursor-blink follows
+;; `blink-cursor-mode', as on GNU Emacs.
+;;
+;; `setopt', not `setq': each option pushes its value to the renderer
+;; from its :set function, which `setq' skips.  The window-animation
+;; master switch also frees the offscreen frames the animations need;
+;; turning the slots off one by one would not.
+
+(when (require 'neomacs-effects nil t)
+  (setopt neomacs-cursor-motion-enabled nil
+          neomacs-window-animations-off t)
+  (when (boundp 'neomacs-effect-cursor-color-cycle)
+    (setopt neomacs-effect-cursor-color-cycle
+            (plist-put (copy-sequence neomacs-effect-cursor-color-cycle)
+                       :enabled nil))))
+
 ;;; neomacs.el ends here
