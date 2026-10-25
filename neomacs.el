@@ -14,13 +14,10 @@
 ;; between Neomacs and GNU Emacs; a setting both runtimes need belongs in
 ;; extra.el instead, so GNU Emacs stays the baseline Neomacs is compared to.
 ;;
-;; Known differences, Neomacs 0.0.19 vs GNU Emacs 31.1:
+;; Known differences, Neomacs 0.0.20 vs GNU Emacs 31.1:
 ;;
 ;; - Org tables size a link by its raw [[...][...]] text, not its
 ;;   description, so `org-table-align' pads the column (below).
-;; - Registering EMMS's MPRIS interface on D-Bus crashes Neomacs (below).
-;; - Byte code Neomacs compiles for some of casual's files fails to load;
-;;   casual is loaded from source instead (below).
 ;; - No native compilation.  Packages live in elpa-neomacs/, see
 ;;   early-init.el.
 ;; - With no font set, Neomacs uses Adwaita Mono instead of fontconfig's
@@ -62,36 +59,16 @@
 (with-eval-after-load 'org-table
   (advice-add 'org-table-align :before #'my/neomacs-org-table-link-warn-a))
 
-;;;; EMMS without MPRIS
+;; The 0.0.19 EMMS MPRIS panic workaround was removed after testing
+;; 0.0.20 on a private D-Bus session: service registration returned
+;; :primary-owner, Player interface registration and `emms-mpris-enable'
+;; completed without error (2026-10-25, EMMS 20260414).
 
-;; Registering the MPRIS Player interface on D-Bus panics Neomacs
-;; (dbus-0.9.11 strings.rs:187, "Unknown typecode") and takes the whole
-;; process down.  Measured with -Q and EMMS 20260414:
-;;
-;;   (require 'emms-mpris)
-;;   (emms-mpris-register-iface emms-mpris-player-iface-spec)
-;;
-;; init.el calls `emms-mpris-enable' when EMMS first loads, so skip it.
-;; EMMS itself works; only desktop media keys via MPRIS are lost.
-
-(advice-add 'emms-mpris-enable :override #'ignore)
-
-;;;; Casual from source
-
-;; Byte code Neomacs compiles for 7 of casual's files fails to load with
-;; (void-variable lambda), at `transient-define-prefix' forms; the same
-;; files load fine from source.  Loading every .elc in elpa-neomacs/ found
-;; no other package affected (337 files load).  So casual is never byte
-;; compiled here: skip it on install, and delete .elc an earlier install
-;; left behind.  This has to run before lisp/casual-config.el.
-
-(define-advice package--compile (:around (fn pkg-desc) neomacs-skip-casual)
-  (unless (eq (package-desc-name pkg-desc) 'casual)
-    (funcall fn pkg-desc)))
-
-(dolist (dir (file-expand-wildcards
-              (expand-file-name "casual-[0-9]*" package-user-dir)))
-  (mapc #'delete-file (directory-files dir t "\\.elc\\'")))
+;; Casual's 0.0.19 source-only workaround was also removed: 0.0.20
+;; freshly compiled all 109 Casual and 18 gptel files, and a separate
+;; process loaded all 127 without error (2026-10-25).  Old .elc files
+;; still need recompilation; gptel-rewrite.elc from 0.0.19 retained the
+;; (void-variable lambda) failure until rebuilt.
 
 ;;;; Renderer effects off
 

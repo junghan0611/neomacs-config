@@ -23,7 +23,7 @@
 #   EMACS_BIN=<path>           GNU Emacs binary (default: emacs on PATH)
 #   NEOMACS_BIN=<path>         Neomacs binary; otherwise `neomacs` on PATH,
 #                              otherwise the release AppImage via appimage-run
-#   NEOMACS_VERSION=0.0.19     AppImage version to look for / fetch
+#   NEOMACS_VERSION=0.0.20     AppImage version to look for / fetch
 #   CHECK_TIMEOUT=900          seconds before a check is declared hung
 #
 # check boots the real GUI startup path (early-init.el, init.el) on a
@@ -36,7 +36,7 @@ set -euo pipefail
 
 PROFILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EMACS_BIN="${EMACS_BIN:-emacs}"
-NEOMACS_VERSION="${NEOMACS_VERSION:-0.0.19}"
+NEOMACS_VERSION="${NEOMACS_VERSION:-0.0.20}"
 APPIMAGE_DIR="${NEOMACS_APPIMAGE_DIR:-$HOME/.local/bin}"
 APPIMAGE="${APPIMAGE_DIR}/neomacs-${NEOMACS_VERSION}-x86_64-unknown-linux-gnu.AppImage"
 CHECK_TIMEOUT="${CHECK_TIMEOUT:-900}"
@@ -126,9 +126,9 @@ cleanup() {
 trap cleanup EXIT
 
 # Start Xvfb on a free display and set CHECK_DISPLAY.  A check must never
-# put a window on the user's screen: Neomacs 0.0.19 cannot start without a
-# display at all, and rejects --daemon=NAME and carries on as a normal GUI
-# session, so a daemon-based check is not headless there.
+# put a window on the user's screen.  Neomacs 0.0.19 rejected named daemons
+# and continued as a GUI session.  0.0.20 supports headless daemons, but
+# this gate deliberately retains the real GUI startup path on Xvfb.
 start_xvfb() {
 	command -v Xvfb >/dev/null 2>&1 ||
 		die "check needs Xvfb (a virtual display, so no window reaches your screen)"

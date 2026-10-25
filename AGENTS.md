@@ -112,17 +112,21 @@ Workarounds for Neomacs go into `neomacs.el`, never into the shared files.
   a snapshot afterwards (savehist also saves on a 5-minute timer). Keep both. Ad-hoc
   probes against this profile follow the same rule: exit with `kill-emacs-hook` unbound,
   and use `timeout --signal=KILL` — plain `timeout` sends SIGTERM, which runs the hooks.
-- **A check must never open a window on GLG's screen.** Neomacs 0.0.19 needs a display
-  even for `--daemon`, and rejects `--daemon=NAME` as an unknown option, then carries on
-  as a normal GUI session. That is why `check` uses Xvfb, not a daemon.
+- **A check must never open a window on GLG's screen.** `check` uses Xvfb to exercise
+  real GUI startup. Neomacs 0.0.19 rejected `--daemon=NAME` and carried on as a GUI
+  session; 0.0.20 supports a headless named daemon (verified with `-Q`, not this full
+  profile). Daemon support is not a reason to replace the GUI startup gate.
 - **`emacs-version` does not identify Neomacs.** Neomacs 0.0.19 reports
   `GNU Emacs 31.1`. Detect it with `(fboundp 'neomacs-core-backend)` (`my/neomacs-p`).
 - **`--init-directory` does not move GNU's eln cache.** Without
   `startup-redirect-eln-cache` in `early-init.el`, native-compiled packages land in
   `~/.config/emacs/eln-cache/` — the Doom directory on GLG's machines.
-- **Neomacs-compiled byte code can be broken.** 7 of casual's `.elc` files fail with
-  `(void-variable lambda)`; `neomacs.el` keeps casual uncompiled on Neomacs. After a
-  Neomacs version bump, re-audit by loading every `.elc` in `elpa-neomacs/`.
+- **Do not carry old bytecode across a runtime upgrade without checking it.**
+  Neomacs 0.0.19 produced `(void-variable lambda)` in Casual and gptel-rewrite.
+  Fresh 0.0.20 compilation and a separate-process load passed for all 127 Casual /
+  gptel files, so the Casual source-only workaround is gone. Recompile affected
+  packages without changing source versions; distinguish optional integrations with
+  absent dependencies from compiler failures. See `documents/neomacs-0.0.20-validation.md`.
 - **`gh` can pick upstream EWS as the default repo.** With the `upstream` remote present,
   `gh release create` resolved to `pprevos/emacs-writing-studio` and refused. Pass
   `-R junghan0611/neomacs-config`, or run `gh repo set-default junghan0611/neomacs-config`
